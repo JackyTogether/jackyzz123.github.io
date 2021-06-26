@@ -1,37 +1,74 @@
-## Welcome to GitHub Pages
+# Code Record
 
-You can use the [editor on GitHub](https://github.com/jackyzz123/jacky.github.io/edit/main/README.md) to maintain and preview the content for your website in Markdown files.
+# Py
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+# JS
 
-### Markdown
+# Others
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## RESTful API
 
-```markdown
-Syntax highlighted code block
+根据method不同做不同操作
 
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+```python
+# 基于FBV
+def order(request):
+	if request.method == 'GET':
+		return HttpResponse('获取订单')
+	elif request.method == 'POST':
+		return HttpResponse('创建订单')
+# 基于CBV
+class OrderView(View):
+	def get(self,request,*args,**kwargs):
+		return HttpRe sponse('获取订单')
+	def post(self,request,*args,**kwargs):
+		return HttpResponse('创建订单')
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+### RESTful API设计
 
-### Jekyll Themes
+- 协议：总是使用HTTPs协议
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/jackyzz123/jacky.github.io/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+- 域名：两种表现URL是API接口的方式
 
-### Support or Contact
+  - [www.luffycity.com变成api.luffycity.com](http://www.luffycity.xn--comapi-k65jl35g.luffycity.com)，得解决跨域问题（一次option预检，一次post，jsonp也可解决跨域）
+  - （优选）[www.luffycity.com变成www.luffycity.com/api/](http://www.luffycity.xn--comwww-k65jl35g.luffycity.com/api/)
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+- 版本：
+
+  - （优选）URL如https://api.example.com/v1/
+  - 请求头，让服务端知道版本
+
+- 路径：视网络上任何东西都是资源，推荐都写名词（可复数），https://api.example.com/v1/名词
+
+- method：GET、POST、PUT（全部更新）、PATCH（局部更新）、DELETE
+
+- 过滤：https://api.example.com/v1/order/?status=1
+
+- 状态码：状态码status（浏览器定义，不写也可以）与code（自定义）结合解决自定义情况
+
+- 错误处理：如果状态码是4xx，应该向用户返回出错信息。一般来说，返回的信息中将error作为键名，出错信息作为键值即可`{error: "Invalid API key"}`
+
+- 返回结果：针对不同操作，服务器向用户返回的结果应该符合以下规范
+
+  ```python
+  GET /collection：返回资源对象的列表（数组） 比如/order/
+  GET /collection/resource：返回单个资源对象  比如/order/1/
+  POST /collection：返回新生成的资源对象
+  PUT /collection/resource：返回完整的资源对象
+  PATCH /collection/resource：返回完整的资源对象
+  DELETE /collection/resource：返回一个空文档
+  ```
+
+- RESTful API最好做到Hypermedia，即返回结果中提供链接，连向其他API方法，使得用户不查文档，也知道下一步应该做什么
+
+  ```python
+  # /order/
+  [
+  	{
+  		id:1,
+  		name:'苹果',
+  		url:<http://www.oldboyedu.com/1/>
+  	},
+  ]
+  ```
