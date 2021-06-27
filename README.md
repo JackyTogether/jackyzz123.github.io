@@ -1,74 +1,128 @@
-# Code Record
+# Dark Poole
 
-# Py
+![Dark Poole](https://user-images.githubusercontent.com/13270895/89133355-26b3af80-d4e9-11ea-81cd-eacaa9c78320.png)
 
-# JS
+Dark Poole is a permanent dark theme of the Poole theme by [@mdo](https://github.com/mdo). I made the theme darker, inspired by [Derek Kedziora's site](https://derekkedziora.com/). Unlike default Poole that utilizes CSS media queries to activate dark mode, the theme will stay dark regardless of the user's preference.
 
-# Others
+- I added a navbar that is easily customizable. Check out [Development](#development) to see how.
+- I also got rid of the "tagline" in the navbar. I think it looks cleaner without it.
+- Finally, I changed the default font size to 20px. I have 20/20 vision and still thought the original font size was too small.
 
-## RESTful API
+That's it! I tried to be least intrusive as possible to the Poole code base.
 
-根据method不同做不同操作
+**I noticed that Poole's documentation is slightly outdated and misleading. This documentation will try to address most, if not all, of these issues.**
 
-```python
-# 基于FBV
-def order(request):
-	if request.method == 'GET':
-		return HttpResponse('获取订单')
-	elif request.method == 'POST':
-		return HttpResponse('创建订单')
-# 基于CBV
-class OrderView(View):
-	def get(self,request,*args,**kwargs):
-		return HttpRe sponse('获取订单')
-	def post(self,request,*args,**kwargs):
-		return HttpResponse('创建订单')
+---
+
+## Contents
+
+- [Usage](#usage)
+- [Development](#development)
+- [Author](#author)
+- [License](#license)
+
+## Usage
+
+### 1. Install dependencies
+
+Poole is built on Jekyll and uses its built-in SCSS compiler to generate our CSS. Before getting started, you'll need to install the Jekyll gem and related dependencies:
+
+```bash
+$ gem install jekyll jekyll-gist jekyll-sitemap jekyll-seo-tag
 ```
 
-### RESTful API设计
+### 2. Install bundler
 
-- 协议：总是使用HTTPs协议
+You must have bundler installed. If you already have bundler installed, please skip this step.
 
-- 域名：两种表现URL是API接口的方式
+```bash
+# Update Rubygems
+$ gem update --system
+# Update bundler
+$ gem install bundler
+```
 
-  - [www.luffycity.com变成api.luffycity.com](http://www.luffycity.xn--comapi-k65jl35g.luffycity.com)，得解决跨域问题（一次option预检，一次post，jsonp也可解决跨域）
-  - （优选）[www.luffycity.com变成www.luffycity.com/api/](http://www.luffycity.xn--comwww-k65jl35g.luffycity.com/api/)
+### 3. Running locally
 
-- 版本：
+To see your Jekyll site with Poole applied, start a Jekyll server. In Terminal, from `/dark-poole` (or whatever your Jekyll site's root directory is named):
 
-  - （优选）URL如https://api.example.com/v1/
-  - 请求头，让服务端知道版本
+```bash
+$ bundle exec jekyll serve
+```
 
-- 路径：视网络上任何东西都是资源，推荐都写名词（可复数），https://api.example.com/v1/名词
+Open <http://localhost:4000> in your browser, and voilà.
 
-- method：GET、POST、PUT（全部更新）、PATCH（局部更新）、DELETE
+### 4. Serving it up
 
-- 过滤：https://api.example.com/v1/order/?status=1
+If you host your code on GitHub, you can use [GitHub Pages](https://pages.github.com) to host your project.
 
-- 状态码：状态码status（浏览器定义，不写也可以）与code（自定义）结合解决自定义情况
+1. Fork this repo and switch to the `gh-pages` branch.
+1. If you're [using a custom domain name](https://help.github.com/articles/setting-up-a-custom-domain-with-github-pages), modify the `CNAME` file to point to your new domain.
+1. If you're not using a custom domain name, **modify the `url` in `_config.yml`** to point to your GitHub Pages URL. Example: for a site hosted at `username.github.io`, use `http://username.github.io`.
+1. If you want to use your repo name as a base url, **set the `url`** to your repo link and **set the `baseurl`** to your repo name in **`_config.yml`**. Example: for site hosted on `https://username.github.io/dark-poole`, set `url` as `https://username.github.io/dark-poole` and `baseurl` as `/dark-poole`.
+1. Done! Head to your GitHub Pages URL or custom domain.
 
-- 错误处理：如果状态码是4xx，应该向用户返回出错信息。一般来说，返回的信息中将error作为键名，出错信息作为键值即可`{error: "Invalid API key"}`
+No matter your production or hosting setup, be sure to verify the `baseurl` option file and `CNAME` settings. Not applying this correctly can mean broken styles on your site.
 
-- 返回结果：针对不同操作，服务器向用户返回的结果应该符合以下规范
+### 5. Pagination for sites with base urls
 
-  ```python
-  GET /collection：返回资源对象的列表（数组） 比如/order/
-  GET /collection/resource：返回单个资源对象  比如/order/1/
-  POST /collection：返回新生成的资源对象
-  PUT /collection/resource：返回完整的资源对象
-  PATCH /collection/resource：返回完整的资源对象
-  DELETE /collection/resource：返回一个空文档
-  ```
+If you are using a base url for your site, (for example, hosted on `https://username.github.io/dark-poole`) you have to make some changes to get jekyll-pagination to work correctly:
 
-- RESTful API最好做到Hypermedia，即返回结果中提供链接，连向其他API方法，使得用户不查文档，也知道下一步应该做什么
+In `_config.yml`, add this line:
 
-  ```python
-  # /order/
-  [
-  	{
-  		id:1,
-  		name:'苹果',
-  		url:<http://www.oldboyedu.com/1/>
-  	},
-  ]
-  ```
+```yaml
+paginate_path: "/baseurl/page:num/"
+```
+
+In `archive.md`, add `{{ site.baseurl }}` before `{{ post.url }}`
+
+```html
+<!-- Add "{{ site.baseurl }}" -->
+<li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+```
+
+In `index.html`, remove the `prepend:`:
+
+```html
+<!-- Remove "prepend:" in "prepend: relative_url" -->
+<a
+  class="pagination-item newer"
+  href="{{ paginator.previous_page_path | relative_url }}"
+  >Newer</a
+>
+```
+
+## Development
+
+Poole has two branches, but only one is used for active development.
+
+- `master` for development. **All pull requests should be to submitted against `master`.**
+- `gh-pages` for hosted demo **Please avoid using this branch.**
+
+CSS is handled via Jeykll's built-in Sass compiler. Source Sass files are located in `_sass/`, included into `styles.scss`, and compile to `styles.css`.
+
+### Customize Navbar
+
+You can easily customize the navbar by tweaking the `_config.yml` file. Simply change the title and url of each of the nav elements, or add more. The order will be preserved in the site.
+
+```yaml
+nav:
+  - title: Blog
+    url: /archive
+
+  - title: About
+    url: /about
+```
+
+## Author
+
+**Mark Otto**
+
+- <https://github.com/mdo>
+- <https://twitter.com/mdo>
+
+## License
+
+Open sourced under the [MIT license](LICENSE.md).
+
+<3
